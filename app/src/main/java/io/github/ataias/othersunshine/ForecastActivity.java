@@ -1,5 +1,6 @@
 package io.github.ataias.othersunshine;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,11 +31,13 @@ public class ForecastActivity extends AppCompatActivity {
 
 //        String[] params = {"http://api.openweathermap.org/data/2.5/forecast/daily?q=Brasilia&mode=json&units=metric&cnt=7&appid=0614cde9f06e70606dca2278f05f6641"};
 
-        String[] fakeData = new String[]{
-                "Today", "Tomorrow", "Day after tomorrow", "Hey, it is 88 degress",
-                "Hello!", "Hello world!", "E aí? Beleza?"};
+        if (mForecast == null) {
+            String[] fakeData = new String[]{
+                    "Today", "Tomorrow", "Day after tomorrow", "Hey, it is 88 degress",
+                    "Hello!", "Hello world!", "E aí? Beleza?"};
 
-        mForecast = new ArrayList<String>(Arrays.asList(fakeData));
+            mForecast = new ArrayList<String>(Arrays.asList(fakeData));
+        }
 
         //if if you use three arguments, the method still exits but it doesn't not work
         mItemsAdapter = new ArrayAdapter<String>(
@@ -57,8 +60,12 @@ public class ForecastActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String value = (String) parent.getItemAtPosition(position);
-                Toast toast = Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT);
-                toast.show();
+//                Toast toast = Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT);
+//                toast.show();
+
+                Intent detailActivityIntent = new Intent(parent.getContext(), DetailActivity.class);
+                detailActivityIntent.putExtra("forecast", value);
+                startActivity(detailActivityIntent);
             }
         });
 
