@@ -23,7 +23,7 @@ public class ForecastActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i(LOG_TAG, "Criou o fetchWeatherTask");
+//        Log.v(LOG_TAG, "Criou o fetchWeatherTask");
 
 //        String[] params = {"http://api.openweathermap.org/data/2.5/forecast/daily?q=Brasilia&mode=json&units=metric&cnt=7&appid=0614cde9f06e70606dca2278f05f6641"};
 

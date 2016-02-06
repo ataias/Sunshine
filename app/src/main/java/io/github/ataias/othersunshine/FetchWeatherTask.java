@@ -60,7 +60,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 .appendQueryParameter(ID_PARAM, mId);
 
         String urlQuery = builder.build().toString();
-        Log.v(LOG_TAG, "URI Bult is " + urlQuery);
+//        Log.v(LOG_TAG, "URI Bult is " + urlQuery);
 
         try {
             // Construct the URL for the OpenWeatherMap query
@@ -113,7 +113,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 }
             }
         }
-        Log.v(LOG_TAG, forecastJsonStr);
+//        Log.v(LOG_TAG, forecastJsonStr);
         try {
             mParsedJson = getWeatherDataFromJson(forecastJsonStr, Integer.parseInt(mDays));
             return mParsedJson;
@@ -207,10 +207,10 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
 
-        //Show parsed data
-        for (String s : resultStrs) {
-            Log.v(LOG_TAG, "Forecast entry: " + s);
-        }
+//        //Show parsed data
+//        for (String s : resultStrs) {
+//            Log.v(LOG_TAG, "Forecast entry: " + s);
+//        }
         return resultStrs;
 
     }
