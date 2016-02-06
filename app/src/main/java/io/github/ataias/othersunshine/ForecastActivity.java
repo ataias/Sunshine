@@ -143,6 +143,7 @@ public class ForecastActivity extends AppCompatActivity {
                     }
                 }
             }
+            Log.v(LOG_TAG, forecastJsonStr);
             return null;
         }
     }
