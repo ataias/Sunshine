@@ -17,9 +17,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--Detail Activity-->
         <activity
             android:name=".DetailActivity"
-            android:parentActivityName=".ForecastActivity"></activity>
+            android:parentActivityName=".ForecastActivity" />
+
+        <!--Settings Activity-->
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".ForecastActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="io.github.ataias.othersunshine.ForecastActivity" />
+        </activity>
     </application>
 
 </manifest>

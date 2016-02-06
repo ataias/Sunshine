@@ -91,6 +91,11 @@ public class ForecastActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_settings) {
+            Intent settingsActivityIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(settingsActivityIntent);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 }
