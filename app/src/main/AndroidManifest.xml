@@ -18,12 +18,10 @@
             </intent-filter>
         </activity>
 
-        <!--Detail Activity-->
+        <!-- Detail Activity -->
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".ForecastActivity" />
-
-        <!--Settings Activity-->
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
