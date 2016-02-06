@@ -8,12 +8,16 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ForecastActivity extends AppCompatActivity {
 
     private final String LOG_TAG = ForecastActivity.class.getSimpleName();
 
-    ArrayAdapter<String> mItemsAdapter;
-    String[] mForecast;
+    static ArrayAdapter<String> mItemsAdapter;
+    List<String> mForecast; //list avoids problem using the clear() method of the adapter
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +27,11 @@ public class ForecastActivity extends AppCompatActivity {
 
 //        String[] params = {"http://api.openweathermap.org/data/2.5/forecast/daily?q=Brasilia&mode=json&units=metric&cnt=7&appid=0614cde9f06e70606dca2278f05f6641"};
 
-        mForecast = new String[] {
+        String[] fakeData = new String[] {
                 "Today",  "Tomorrow", "Day after tomorrow", "Hey, it is 88 degress",
                 "Hello!", "Hello world!", "E aí? Beleza?"};
+
+        mForecast = new ArrayList<String>(Arrays.asList(fakeData));
 
         //if if you use three arguments, the method still exits but it doesn't not work
         mItemsAdapter = new ArrayAdapter<String>(
