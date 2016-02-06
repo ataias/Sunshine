@@ -229,8 +229,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     protected void onPostExecute(String[] strings) {
         super.onPostExecute(strings);
 
+        //When an adapter is changed, it automatically calls the notifyDataSetChanged() internally
         ForecastActivity.mItemsAdapter.clear();
         ForecastActivity.mItemsAdapter.addAll(mParsedJson);
-        ForecastActivity.mItemsAdapter.notifyDataSetChanged();
     }
 }

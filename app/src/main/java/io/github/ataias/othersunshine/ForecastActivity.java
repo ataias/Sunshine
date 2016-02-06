@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +30,8 @@ public class ForecastActivity extends AppCompatActivity {
 
 //        String[] params = {"http://api.openweathermap.org/data/2.5/forecast/daily?q=Brasilia&mode=json&units=metric&cnt=7&appid=0614cde9f06e70606dca2278f05f6641"};
 
-        String[] fakeData = new String[] {
-                "Today",  "Tomorrow", "Day after tomorrow", "Hey, it is 88 degress",
+        String[] fakeData = new String[]{
+                "Today", "Tomorrow", "Day after tomorrow", "Hey, it is 88 degress",
                 "Hello!", "Hello world!", "E aí? Beleza?"};
 
         mForecast = new ArrayList<String>(Arrays.asList(fakeData));
@@ -49,6 +52,16 @@ public class ForecastActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById(R.id.main_list_view);
         listView.setAdapter(mItemsAdapter);
 
+        //classe anônima! yeye!!
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String value = (String) parent.getItemAtPosition(position);
+                Toast toast = Toast.makeText(getApplicationContext(), value, Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
+
     }
 
     @Override
@@ -67,7 +80,7 @@ public class ForecastActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_refresh) {
-            new FetchWeatherTask().execute(new String[] {"94035,us"});
+            new FetchWeatherTask().execute(new String[]{"94035,us"});
             return true;
         }
 
