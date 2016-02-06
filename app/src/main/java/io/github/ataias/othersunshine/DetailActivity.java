@@ -1,5 +1,6 @@
 package io.github.ataias.othersunshine;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,7 +15,8 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        String data = getIntent().getExtras().getString("forecast");
+        //Getting data that was passed when activity opened
+        String data = getIntent().getExtras().getString(Intent.EXTRA_TEXT);
         TextView textView = (TextView) findViewById(R.id.detail_text_view);
         textView.setText(data);
     }

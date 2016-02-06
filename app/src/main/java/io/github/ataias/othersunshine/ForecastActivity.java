@@ -64,7 +64,7 @@ public class ForecastActivity extends AppCompatActivity {
 //                toast.show();
 
                 Intent detailActivityIntent = new Intent(parent.getContext(), DetailActivity.class);
-                detailActivityIntent.putExtra("forecast", value);
+                detailActivityIntent.putExtra(Intent.EXTRA_TEXT, value);
                 startActivity(detailActivityIntent);
             }
         });
