@@ -4,19 +4,15 @@ package io.github.ataias.othersunshine;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -26,6 +22,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+
+        final String LOG_TAG = "onPrefChangeListener";
+
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
@@ -38,11 +37,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                 // Set the summary to reflect the new value.
                 preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
+                Log.v(LOG_TAG, "Set summary for list");
 
             } else {
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
+                Log.v(LOG_TAG, "Set summary for general preference");
             }
             return true;
         }

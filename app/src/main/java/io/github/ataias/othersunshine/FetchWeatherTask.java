@@ -1,7 +1,9 @@
 package io.github.ataias.othersunshine;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -32,8 +34,17 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
     String[] mParsedJson;
 
+    //Preferences
+    String mLocation; //can be city name (comma country) or zipcode
+    boolean isMetric;
+
     @Override
     protected String[] doInBackground(String... params) {
+
+        //Initialize preferences
+        mLocation = params[0];
+        isMetric = Integer.parseInt(params[1]) == 0;
+
         //Forecast request
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -53,20 +64,18 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         builder.scheme("http")
                 .authority("api.openweathermap.org").appendPath("data").appendPath("2.5")
                 .appendPath("forecast").appendPath("daily")
-                .appendQueryParameter(QUERY_PARAM, params[0])
+                .appendQueryParameter(QUERY_PARAM, mLocation)
                 .appendQueryParameter(FORMAT_PARAM, mQueryFormat)
                 .appendQueryParameter(UNITS_PARAM, mUnits)
                 .appendQueryParameter(DAYS_PARAM, mDays)
                 .appendQueryParameter(ID_PARAM, mId);
 
         String urlQuery = builder.build().toString();
-//        Log.v(LOG_TAG, "URI Bult is " + urlQuery);
 
         try {
             // Construct the URL for the OpenWeatherMap query
             // Possible parameters are avaiable at OWM's forecast API page, at
             // http://openweathermap.org/API#forecast
-//                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=Brasilia&mode=json&units=metric&cnt=7&appid=0614cde9f06e70606dca2278f05f6641");
             URL url = new URL(urlQuery);
 
             // Create the request to OpenWeatherMap, and open the connection
@@ -97,7 +106,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             }
             forecastJsonStr = buffer.toString();
         } catch (IOException e) {
-            Log.e("PlaceholderFragment", "Error ", e);
+            Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
             // to parse it.
             return null;
@@ -125,10 +134,22 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
     // MARK: JSON Parsing
 
+    /*
+    @params Tc is the temperature in celsius
+     */
+    private double toFahrenheit(double Tc){
+        return Tc*9/5 + 32;
+    }
+
     /**
      * Prepare the weather high/lows for presentation.
      */
     private String formatHighLows(double high, double low) {
+        if (!isMetric) {
+            high = toFahrenheit(high);
+            low = toFahrenheit(low);
+        }
+
         // For presentation, assume the user doesn't care about tenths of a degree.
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
@@ -207,10 +228,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
 
-//        //Show parsed data
-//        for (String s : resultStrs) {
-//            Log.v(LOG_TAG, "Forecast entry: " + s);
-//        }
         return resultStrs;
 
     }
