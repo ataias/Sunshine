@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.support.v7.widget.ShareActionProvider;
 
 import java.util.ArrayList;
 
@@ -61,6 +63,9 @@ public class ForecastActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
+        menu.findItem(R.id.action_share).setVisible(false);
+
         return true;
     }
 
@@ -92,7 +97,6 @@ public class ForecastActivity extends AppCompatActivity {
         if(id == R.id.action_map) {
             showMap();
         }
-
 
         return super.onOptionsItemSelected(item);
     }
