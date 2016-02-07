@@ -2,6 +2,7 @@ package io.github.ataias.othersunshine;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -88,10 +89,17 @@ public class ForecastActivity extends AppCompatActivity {
     }
 
     private void updateWeather() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String city = prefs.getString(getString(R.string.pref_location_key), "Brasilia");
+        Resources res = getResources();
 
-        String unit = prefs.getString(getString(R.string.pref_temperature_unit_key), "metric");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String defaultLocation = res.getString(R.string.pref_default_location);
+        String city = prefs.getString(getString(R.string.pref_location_key), defaultLocation);
+
+
+        String[] possibleUnits = res.getStringArray(R.array.pref_temperature_unit_values);
+        String unit = prefs.getString(getString(R.string.pref_temperature_unit_key), possibleUnits[0]);
+
         new FetchWeatherTask().execute(city, unit);
     }
 }

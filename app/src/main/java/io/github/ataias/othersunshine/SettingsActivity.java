@@ -139,9 +139,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.preferences);
             setHasOptionsMenu(true);
 
-            //For all preferences, we need to bind them to a listener to change its
-            //internal stored value
+            //This shows the summary just below the value each time the value is updated
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_temperature_unit_key)));
 
         }
 
