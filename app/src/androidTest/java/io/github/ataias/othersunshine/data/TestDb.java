@@ -1,5 +1,6 @@
 package io.github.ataias.othersunshine.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
@@ -25,7 +26,7 @@ public class TestDb extends AndroidTestCase {
         deleteTheDatabase();
     }
 
-        public void testCreateDb() throws Throwable {
+    public void testCreateDb() throws Throwable {
         // build a HashSet of all of the table names we wish to look for
         // Note that there will be another table in the DB that stores the
         // Android metadata (db version information)
@@ -34,8 +35,12 @@ public class TestDb extends AndroidTestCase {
         tableNameHashSet.add(WeatherContract.WeatherEntry.TABLE_NAME);
 
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+
+        //Get reference to a writable database
         SQLiteDatabase db = new WeatherDbHelper(
                 this.mContext).getWritableDatabase();
+
+        //check that it is open
         assertEquals(true, db.isOpen());
 
         // have we created the tables we want?
@@ -47,7 +52,7 @@ public class TestDb extends AndroidTestCase {
         // verify that the tables have been created
         do {
             tableNameHashSet.remove(c.getString(0));
-        } while( c.moveToNext() );
+        } while (c.moveToNext());
 
         // if this fails, it means that your database doesn't contain both the location entry
         // and weather entry tables
@@ -73,7 +78,7 @@ public class TestDb extends AndroidTestCase {
         do {
             String columnName = c.getString(columnNameIndex);
             locationColumnHashSet.remove(columnName);
-        } while(c.moveToNext());
+        } while (c.moveToNext());
 
         // if this fails, it means that your database doesn't contain all of the required location
         // entry columns
@@ -88,24 +93,61 @@ public class TestDb extends AndroidTestCase {
     where you can uncomment out the "createNorthPoleLocationValues" function.  You can
     also make use of the ValidateCurrentRecord function from within TestUtilities.
 */
-    public void testLocationTable() {
+    public long testLocationTable() {
         // First step: Get reference to writable database
+        SQLiteDatabase db = new WeatherDbHelper(
+                this.mContext).getWritableDatabase();
 
         // Create ContentValues of what you want to insert
-        // (you can use the createNorthPoleLocationValues if you wish)
+        ContentValues locationRow = TestUtilities.createNorthPoleLocationValues();
 
         // Insert ContentValues into database and get a row ID back
+        long rowId = db.insert(WeatherContract.LocationEntry.TABLE_NAME, null, locationRow);
+
+        //-1 indicates there was an error, as the value returned is a positive rowId
+        assertNotSame(rowId, -1);
 
         // Query the database and receive a Cursor back
+        Cursor queryResult = db.rawQuery("SELECT * FROM " + WeatherContract.LocationEntry.TABLE_NAME, null);
 
         // Move the cursor to a valid database row
+        boolean isNotEmpty = queryResult.moveToFirst();
 
         // Validate data in resulting Cursor with the original ContentValues
-        // (you can use the validateCurrentRecord function in TestUtilities to validate the
-        // query if you like)
+        String columnName;
+
+        //Assert location setting
+        columnName = WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING;
+        assertEquals("Column \"" + columnName + "\"" + " not inserted correctly: ",
+                locationRow.get(columnName),
+                queryResult.getString(queryResult.getColumnIndex(columnName)));
+
+        //Assert city name
+        columnName = WeatherContract.LocationEntry.COLUMN_CITY_NAME;
+        assertEquals("Column \"" + columnName + "\"" + " not inserted correctly: ",
+                locationRow.get(columnName),
+                queryResult.getString(queryResult.getColumnIndex(columnName)));
+
+        //Assert latitude
+        columnName = WeatherContract.LocationEntry.COLUMN_COORD_LAT;
+        assertEquals("Column \"" + columnName + "\"" + " not inserted correctly: ",
+                locationRow.get(columnName),
+                queryResult.getDouble(queryResult.getColumnIndex(columnName)));
+
+        //Assert longitude
+        columnName = WeatherContract.LocationEntry.COLUMN_COORD_LONG;
+        assertEquals("Column \"" + columnName + "\"" + " not inserted correctly: ",
+                locationRow.get(columnName),
+                queryResult.getDouble(queryResult.getColumnIndex(columnName)));
+
+        //Guarantee there is only one record
+        assertFalse("Error, more than one record returned from location query.", queryResult.moveToNext());
 
         // Finally, close the cursor and database
+        queryResult.close();
+        db.close();
 
+        return rowId;
     }
 
     /*
