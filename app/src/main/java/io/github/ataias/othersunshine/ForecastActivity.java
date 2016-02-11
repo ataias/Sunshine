@@ -6,9 +6,11 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +30,8 @@ public class ForecastActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.v(LOG_TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -60,6 +64,18 @@ public class ForecastActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        Log.v(LOG_TAG, "onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.v(LOG_TAG, "onPause");
+        super.onPause();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
@@ -71,8 +87,21 @@ public class ForecastActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
+        Log.v(LOG_TAG, "onStart");
         super.onStart();
         updateWeather();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.v(LOG_TAG, "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.v(LOG_TAG, "onStop");
+        super.onStop();
     }
 
     @Override
