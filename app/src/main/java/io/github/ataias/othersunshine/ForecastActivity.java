@@ -26,7 +26,7 @@ public class ForecastActivity extends AppCompatActivity {
 
     private final String LOG_TAG = ForecastActivity.class.getSimpleName();
 
-    static ArrayAdapter<String> mItemsAdapter;
+    ArrayAdapter<String> mItemsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,7 +142,7 @@ public class ForecastActivity extends AppCompatActivity {
         String[] possibleUnits = res.getStringArray(R.array.pref_temperature_unit_values);
         String unit = prefs.getString(getString(R.string.pref_temperature_unit_key), possibleUnits[0]);
 
-        new FetchWeatherTask().execute(city, unit);
+        new FetchWeatherTask(getApplicationContext(), mItemsAdapter).execute(city, unit);
     }
 
     private void showMap() {
