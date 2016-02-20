@@ -145,7 +145,7 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
                 .appendQueryParameter(WeatherContract.WeatherEntry.COLUMN_DATE, String.valueOf(currentDate))
                 .build();
 
-        String[] projection = null;
+        String[] projection = ForecastAdapter.FORECAST_COLUMNS;
         String selection = null;
         String[] selectionArgs = null;
 
