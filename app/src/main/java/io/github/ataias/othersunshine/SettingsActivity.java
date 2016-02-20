@@ -45,6 +45,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 preference.setSummary(stringValue);
                 Log.v(LOG_TAG, "Set summary for general preference");
             }
+
+
             return true;
         }
     };

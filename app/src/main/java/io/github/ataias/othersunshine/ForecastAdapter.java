@@ -76,6 +76,25 @@ public class ForecastAdapter extends CursorAdapter {
                 " - " + highAndLow;
     }
 
+
+    static private String formatHighLows(Context context, double high, double low) {
+        boolean isMetric = Utility.isMetric(context);
+        String highLowStr = Utility.formatTemperature(high, isMetric) + "/" + Utility.formatTemperature(low, isMetric);
+        return highLowStr;
+    }
+
+    public static String convertCursorRowToUXFormat(Context context, Cursor cursor) {
+        // get row indices for our cursor
+        String highAndLow = formatHighLows(
+                context,
+                cursor.getDouble(COL_WEATHER_MAX_TEMP),
+                cursor.getDouble(COL_WEATHER_MIN_TEMP));
+
+        return Utility.formatDate(cursor.getLong(COL_WEATHER_DATE)) +
+                " - " + cursor.getString(COL_WEATHER_DESC) +
+                " - " + highAndLow;
+    }
+
     /*
         Remember that these views are reused as needed.
      */

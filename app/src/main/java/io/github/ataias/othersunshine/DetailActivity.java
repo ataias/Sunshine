@@ -1,6 +1,8 @@
 package io.github.ataias.othersunshine;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,11 +24,21 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         //Getting data that was passed when activity opened
-        String data = getIntent().getExtras().getString(Intent.EXTRA_TEXT);
+        Uri uri = getIntent().getData();
         TextView textView = (TextView) findViewById(R.id.detail_text_view);
-        textView.setText(data);
 
-        mForecastStr = data;
+        Cursor cursor = getContentResolver().query(uri, ForecastAdapter.FORECAST_COLUMNS, null, null, null);
+
+        try {
+            cursor.moveToFirst();
+            String data = ForecastAdapter.convertCursorRowToUXFormat(this, cursor);
+            textView.setText(data);
+            mForecastStr = data;
+        } finally {
+            cursor.close();
+        }
+
+
     }
 
     @Override

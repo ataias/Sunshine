@@ -14,6 +14,8 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -42,16 +44,25 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
 
         getLoaderManager().initLoader(FORECAST_DATA_LOADER, null, this);
 
-//        //classe anônima! yeye!!
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                String value = (String) parent.getItemAtPosition(position);
-//                Intent detailActivityIntent = new Intent(parent.getContext(), DetailActivity.class);
-//                detailActivityIntent.putExtra(Intent.EXTRA_TEXT, value);
-//                startActivity(detailActivityIntent);
-//            }
-//        });
+        //classe anônima! yeye!!
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View view, int position, long id) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null) {
+                    String locationSetting = Utility.getPreferredLocation(getApplicationContext());
+                    Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+                    intent.setData(
+                            WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                                    locationSetting,
+                                    cursor.getLong(ForecastAdapter.COL_WEATHER_DATE)
+                            ));
+                    startActivity(intent);
+                }
+            }
+        });
 
     }
 
@@ -94,6 +105,14 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //If user changes settings and then click "back" button,
+        // this guarantees that new location settings will be loaded
+        getLoaderManager().restartLoader(FORECAST_DATA_LOADER, null, this);
     }
 
     private String getCurrentTemperatureUnit() {
@@ -140,6 +159,7 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
         long currentDate = Utility.getCurrentTime();
         String queryParam = Utility.getPreferredLocation(getApplicationContext());
 
+        //This line gives the link to the content provider and query parameters
         Uri uri = WeatherContract.WeatherEntry.CONTENT_URI.buildUpon()
                 .appendPath(queryParam)
                 .appendQueryParameter(WeatherContract.WeatherEntry.COLUMN_DATE, String.valueOf(currentDate))
