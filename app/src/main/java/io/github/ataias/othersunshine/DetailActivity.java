@@ -1,17 +1,23 @@
 package io.github.ataias.othersunshine;
 
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class DetailActivity extends AppCompatActivity {
+import io.github.ataias.othersunshine.data.WeatherContract;
+
+public class DetailActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+
+    private static final int DETAIL_DATA_LOADER = 1;
 
     String mForecastStr;
     final String LOG_TAG = DetailActivity.class.getSimpleName();
@@ -23,22 +29,7 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        //Getting data that was passed when activity opened
-        Uri uri = getIntent().getData();
-        TextView textView = (TextView) findViewById(R.id.detail_text_view);
-
-        Cursor cursor = getContentResolver().query(uri, ForecastAdapter.FORECAST_COLUMNS, null, null, null);
-
-        try {
-            cursor.moveToFirst();
-            String data = ForecastAdapter.convertCursorRowToUXFormat(this, cursor);
-            textView.setText(data);
-            mForecastStr = data;
-        } finally {
-            cursor.close();
-        }
-
-
+        getLoaderManager().initLoader(DETAIL_DATA_LOADER, null, this);
     }
 
     @Override
@@ -50,7 +41,9 @@ public class DetailActivity extends AppCompatActivity {
 
         MenuItem shareItem = menu.findItem(R.id.action_share);
         shareAP = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-        shareAP.setShareIntent(getShareIntent());
+
+        if (shareAP != null)
+            shareAP.setShareIntent(getShareIntent());
 
         return true;
     }
@@ -77,5 +70,41 @@ public class DetailActivity extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_TEXT, mForecastStr + APP_HASHTAG);
 
         return intent;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        String[] projection = ForecastAdapter.FORECAST_COLUMNS;
+
+        return new CursorLoader(
+                this,
+                getIntent().getData(),
+                projection,
+                null,
+                null,
+                WeatherContract.WeatherEntry.COLUMN_DATE + " ASC"
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        cursor.moveToFirst();
+        String data = ForecastAdapter.convertCursorRowToUXFormat(this, cursor);
+        mForecastStr = data;
+
+        TextView textView = (TextView) findViewById(R.id.detail_text_view);
+        textView.setText(mForecastStr);
+
+        if(shareAP != null) {
+            shareAP.setShareIntent(getShareIntent());
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }
