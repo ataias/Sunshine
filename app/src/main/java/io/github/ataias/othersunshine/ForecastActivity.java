@@ -30,6 +30,7 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
     private static final int FORECAST_DATA_LOADER = 0;
 
     ForecastAdapter mForecastAdapter;
+    String mLocation; //last known location
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +113,11 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
         super.onResume();
         //If user changes settings and then click "back" button,
         // this guarantees that new location settings will be loaded
-        getLoaderManager().restartLoader(FORECAST_DATA_LOADER, null, this);
+        if (mLocation != null)
+            if (!mLocation.equals(Utility.getPreferredLocation(getApplicationContext()))) {
+                getLoaderManager().restartLoader(FORECAST_DATA_LOADER, null, this);
+                mLocation = Utility.getPreferredLocation(getApplicationContext());
+            }
     }
 
     private String getCurrentTemperatureUnit() {
@@ -191,6 +196,8 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
         if (data.getCount() < MIN_CURSOR_ENTRIES) {
             updateWeather();
         }
+
+        mLocation = Utility.getPreferredLocation(getApplicationContext());
     }
 
     @Override

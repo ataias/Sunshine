@@ -34,7 +34,8 @@
         <!--Content provider-->
         <provider
             android:name="io.github.ataias.othersunshine.data.WeatherProvider"
-            android:authorities="io.github.ataias.othersunshine.app" />
+            android:authorities="io.github.ataias.othersunshine.app"
+            android:exported="true" />
     </application>
 
 </manifest>
