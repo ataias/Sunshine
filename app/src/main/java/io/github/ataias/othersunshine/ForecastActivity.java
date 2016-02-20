@@ -21,6 +21,8 @@ import io.github.ataias.othersunshine.data.WeatherContract;
 
 public class ForecastActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private final long MIN_CURSOR_ENTRIES = 10;
+
     private final String LOG_TAG = ForecastActivity.class.getSimpleName();
 
     private static final int FORECAST_DATA_LOADER = 0;
@@ -33,33 +35,11 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String locationSetting = Utility.getPreferredLocation(getApplicationContext());
+        mForecastAdapter = new ForecastAdapter(this, null, 0);
 
-        // Sort order:  Ascending, by date.
-        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                locationSetting,
-                System.currentTimeMillis()
-        );
-
-        Cursor cur = getContentResolver().query(
-                weatherForLocationUri,
-                null,
-                null,
-                null,
-                sortOrder
-        );
-
-        mForecastAdapter = new ForecastAdapter(this, cur, 0);
-
-        //Container is the parent view of the fragment
-        //If not used, it complains that it is a static method in a non-static environment
-        //and it does not work
         ListView listView = (ListView) findViewById(R.id.main_list_view);
         listView.setAdapter(mForecastAdapter);
 
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
         getLoaderManager().initLoader(FORECAST_DATA_LOADER, null, this);
 
 //        //classe anônima! yeye!!
@@ -114,7 +94,6 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
     @Override
     protected void onStart() {
         super.onStart();
-        updateWeather();
     }
 
     private String getCurrentTemperatureUnit() {
@@ -186,6 +165,12 @@ public class ForecastActivity extends AppCompatActivity implements LoaderManager
         // is no longer using it. For example, if the data is a cursor
         // from a CursorLoader, you should not call close() on it yourself.
         mForecastAdapter.swapCursor(data);
+
+        //Only get weather data from internet if number of cursor entries is smaller
+        // then MIN_CURSOR_ENTRIES
+        if (data.getCount() < MIN_CURSOR_ENTRIES) {
+            updateWeather();
+        }
     }
 
     @Override
