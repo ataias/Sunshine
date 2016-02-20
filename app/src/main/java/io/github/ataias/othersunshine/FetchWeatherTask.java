@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.format.Time;
@@ -25,9 +24,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
-import io.github.ataias.othersunshine.data.WeatherContract;
-import io.github.ataias.othersunshine.data.WeatherContract.WeatherEntry;
 import io.github.ataias.othersunshine.data.WeatherContract.LocationEntry;
+import io.github.ataias.othersunshine.data.WeatherContract.WeatherEntry;
+
 /**
  * Created by ataias on 2/6/16.
  */
@@ -161,8 +160,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     /*
     @params Tc is the temperature in celsius
      */
-    private double toFahrenheit(double Tc){
-        return Tc*9/5 + 32;
+    private double toFahrenheit(double Tc) {
+        return Tc * 9 / 5 + 32;
     }
 
     /**
@@ -188,11 +187,16 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 new String[]{LocationEntry._ID, LocationEntry.COLUMN_CITY_NAME},
                 LocationEntry.TABLE_NAME + "." + LocationEntry.COLUMN_CITY_NAME + " = ? ",
                 new String[]{cityName},
-                null
-        );
-        if(cursor.moveToFirst()) {
-            return cursor.getInt(cursor.getColumnIndex(LocationEntry._ID));
+                null);
+
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(cursor.getColumnIndex(LocationEntry._ID));
+            }
+        } finally {
+            cursor.close();
         }
+
         return -1;
     }
 
@@ -200,9 +204,9 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * Helper method to handle insertion of a new location in the weather database.
      *
      * @param locationSetting The location string used to request updates from the server.
-     * @param cityName A human-readable city name, e.g "Mountain View"
-     * @param lat the latitude of the city
-     * @param lon the longitude of the city
+     * @param cityName        A human-readable city name, e.g "Mountain View"
+     * @param lat             the latitude of the city
+     * @param lon             the longitude of the city
      * @return the row ID of the added location.
      */
     long addLocation(String locationSetting, String cityName, double lat, double lon) {
@@ -234,7 +238,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
         // return strings to keep UI functional for now
         String[] resultStrs = new String[cvv.size()];
-        for ( int i = 0; i < cvv.size(); i++ ) {
+        for (int i = 0; i < cvv.size(); i++) {
             ContentValues weatherValues = cvv.elementAt(i);
             String highAndLow = formatHighLows(
                     weatherValues.getAsDouble(WeatherEntry.COLUMN_MAX_TEMP),
@@ -251,7 +255,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     /**
      * Take the String representing the complete forecast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
-     *
+     * <p/>
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
@@ -324,7 +328,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             // now we work exclusively in UTC
             dayTime = new Time();
 
-            for(int i = 0; i < weatherArray.length(); i++) {
+            for (int i = 0; i < weatherArray.length(); i++) {
                 // These are the values that will be collected.
                 long dateTime;
                 double pressure;
@@ -342,7 +346,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 JSONObject dayForecast = weatherArray.getJSONObject(i);
 
                 // Cheating to convert this to UTC time, which is what we want anyhow
-                dateTime = dayTime.setJulianDay(julianStartDay+i);
+                dateTime = dayTime.setJulianDay(julianStartDay + i);
 
                 pressure = dayForecast.getDouble(OWM_PRESSURE);
                 humidity = dayForecast.getInt(OWM_HUMIDITY);
@@ -379,13 +383,13 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             }
 
             // add to database
-            if ( cVVector.size() > 0 ) {
-//                ContentResolver resolver = mContext.getContentResolver();
-//
-//                resolver.bulkInsert(
-//                        WeatherEntry.CONTENT_URI,
-//                        (ContentValues[]) cVVector.toArray()
-//                );
+            if (cVVector.size() > 0) {
+                ContentResolver resolver = mContext.getContentResolver();
+
+                resolver.bulkInsert(
+                        WeatherEntry.CONTENT_URI,
+                        cVVector.toArray(new ContentValues[cVVector.size()])
+                );
             }
 
             // Sort order:  Ascending, by date.
