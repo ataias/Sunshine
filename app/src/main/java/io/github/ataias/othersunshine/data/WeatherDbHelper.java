@@ -3,7 +3,6 @@ package io.github.ataias.othersunshine.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Created by ataias on 2/11/16.

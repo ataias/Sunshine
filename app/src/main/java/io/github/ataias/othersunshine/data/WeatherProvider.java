@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
-import io.github.ataias.othersunshine.data.WeatherContract;
+import io.github.ataias.othersunshine.data.WeatherContract.LocationEntry;
+import io.github.ataias.othersunshine.data.WeatherContract.WeatherEntry;
 
 /**
  * Created by ataias on 2/19/16.
@@ -38,30 +39,30 @@ public class WeatherProvider extends ContentProvider {
         //This is an inner join which looks like
         //weather INNER JOIN location ON weather.location_id = location._id
         sWeatherByLocationSettingQueryBuilder.setTables(
-                WeatherContract.WeatherEntry.TABLE_NAME + " INNER JOIN " +
-                        WeatherContract.LocationEntry.TABLE_NAME +
-                        " ON " + WeatherContract.WeatherEntry.TABLE_NAME +
-                        "." + WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
-                        " = " + WeatherContract.LocationEntry.TABLE_NAME +
-                        "." + WeatherContract.LocationEntry._ID);
+                WeatherEntry.TABLE_NAME + " INNER JOIN " +
+                        LocationEntry.TABLE_NAME +
+                        " ON " + WeatherEntry.TABLE_NAME +
+                        "." + WeatherEntry.COLUMN_LOC_KEY +
+                        " = " + LocationEntry.TABLE_NAME +
+                        "." + LocationEntry._ID);
     }
 
     //location.location_setting = ?
     private static final String sLocationSettingSelection =
-            WeatherContract.LocationEntry.TABLE_NAME +
-                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? ";
+            LocationEntry.TABLE_NAME +
+                    "." + LocationEntry.COLUMN_LOCATION_SETTING + " = ? ";
 
     //location.location_setting = ? AND date >= ?
     private static final String sLocationSettingWithStartDateSelection =
-            WeatherContract.LocationEntry.TABLE_NAME +
-                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
-                    WeatherContract.WeatherEntry.COLUMN_DATE + " >= ? ";
+            LocationEntry.TABLE_NAME +
+                    "." + LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
+                    WeatherEntry.COLUMN_DATE + " >= ? ";
 
     //location.location_setting = ? AND date = ?
     private static final String sLocationSettingAndDaySelection =
-            WeatherContract.LocationEntry.TABLE_NAME +
-                    "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
-                    WeatherContract.WeatherEntry.COLUMN_DATE + " = ? ";
+            LocationEntry.TABLE_NAME +
+                    "." + LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
+                    WeatherEntry.COLUMN_DATE + " = ? ";
 
     private Cursor getLocation(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         return mOpenHelper.getReadableDatabase().query(
@@ -277,18 +278,30 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // Student: Start by getting a writable database
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int nDeletedRows = 0;
 
-        // Student: Use the uriMatcher to match the WEATHER and LOCATION URI's we are going to
-        // handle.  If it doesn't match these, throw an UnsupportedOperationException.
+        //this makes delete all rows return the numbers of rows deleted
+        if (null == selection) selection = "1";
+        switch (match) {
+            case WEATHER: {
+                nDeletedRows = db.delete(WeatherContract.WeatherEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
 
-        // Student: A null value deletes all rows.  In my implementation of this, I only notified
-        // the uri listeners (using the content resolver) if the rowsDeleted != 0 or the selection
-        // is null.
-        // Oh, and you should notify the listeners here.
+            case LOCATION: {
+                nDeletedRows = db.delete(WeatherContract.LocationEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
 
-        // Student: return the actual rows deleted
-        return 0;
+        }
+
+        if (nDeletedRows != 0)
+            getContext().getContentResolver().notifyChange(uri, null);
+        return nDeletedRows;
     }
 
     private void normalizeDate(ContentValues values) {
@@ -302,9 +315,29 @@ public class WeatherProvider extends ContentProvider {
     @Override
     public int update(
             Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        // Student: This is a lot like the delete function.  We return the number of rows impacted
-        // by the update.
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int nUpdatedRows = 0;
+
+        switch (match) {
+            case WEATHER:
+                nUpdatedRows = db.update(WeatherContract.WeatherEntry.TABLE_NAME, values, selection, selectionArgs);
+                if (nUpdatedRows == 0) throw new android.database.SQLException(
+                        "Failed to update rows from " + WeatherContract.WeatherEntry.TABLE_NAME
+                );
+                break;
+            case LOCATION:
+                nUpdatedRows = db.update(WeatherContract.LocationEntry.TABLE_NAME, values, selection, selectionArgs);
+                if (nUpdatedRows == 0) throw new android.database.SQLException(
+                        "Failed to update rows from " + WeatherContract.LocationEntry.TABLE_NAME
+                );
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        if (nUpdatedRows != 0) getContext().getContentResolver().notifyChange(uri, null);
+        return nUpdatedRows;
     }
 
     @Override
@@ -312,6 +345,7 @@ public class WeatherProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         switch (match) {
+            //notice that we only add weather data in bulk
             case WEATHER:
                 db.beginTransaction();
                 int returnCount = 0;

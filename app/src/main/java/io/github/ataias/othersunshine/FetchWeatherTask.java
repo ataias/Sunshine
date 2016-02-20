@@ -1,7 +1,10 @@
 package io.github.ataias.othersunshine;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.format.Time;
@@ -22,7 +25,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
 
+import io.github.ataias.othersunshine.data.WeatherContract;
 import io.github.ataias.othersunshine.data.WeatherContract.WeatherEntry;
+import io.github.ataias.othersunshine.data.WeatherContract.LocationEntry;
 /**
  * Created by ataias on 2/6/16.
  */
@@ -177,6 +182,20 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return highLowStr;
     }
 
+    int queryCityName(ContentResolver resolver, String cityName) {
+        Cursor cursor = resolver.query(
+                LocationEntry.CONTENT_URI,
+                new String[]{LocationEntry._ID, LocationEntry.COLUMN_CITY_NAME},
+                LocationEntry.TABLE_NAME + "." + LocationEntry.COLUMN_CITY_NAME + " = ? ",
+                new String[]{cityName},
+                null
+        );
+        if(cursor.moveToFirst()) {
+            return cursor.getInt(cursor.getColumnIndex(LocationEntry._ID));
+        }
+        return -1;
+    }
+
     /**
      * Helper method to handle insertion of a new location in the weather database.
      *
@@ -187,10 +206,24 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * @return the row ID of the added location.
      */
     long addLocation(String locationSetting, String cityName, double lat, double lon) {
-        // Students: First, check if the location with this city name exists in the db
-        // If it exists, return the current ID
-        // Otherwise, insert it using the content resolver and the base URI
-        return -1;
+
+        ContentResolver resolver = mContext.getContentResolver();
+        int _id = queryCityName(resolver, cityName);
+        if (_id == -1) {
+
+            //Location wasn't added before
+            ContentValues value = new ContentValues();
+            value.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+            value.put(LocationEntry.COLUMN_CITY_NAME, cityName);
+            value.put(LocationEntry.COLUMN_COORD_LAT, lat);
+            value.put(LocationEntry.COLUMN_COORD_LONG, lon);
+            resolver.insert(LocationEntry.CONTENT_URI, value);
+
+            //Should have been added by now
+            _id = queryCityName(resolver, cityName);
+        }
+
+        return _id;
     }
 
     /*
@@ -347,7 +380,12 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
             // add to database
             if ( cVVector.size() > 0 ) {
-                // Student: call bulkInsert to add the weatherEntries to the database here
+//                ContentResolver resolver = mContext.getContentResolver();
+//
+//                resolver.bulkInsert(
+//                        WeatherEntry.CONTENT_URI,
+//                        (ContentValues[]) cVVector.toArray()
+//                );
             }
 
             // Sort order:  Ascending, by date.
@@ -368,10 +406,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 //                    cVVector.add(cv);
 //                } while (cur.moveToNext());
 //            }
-
-            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
+//
+//            Log.d(LOG_TAG, "FetchWeatherTask Complete. " + cVVector.size() + " Inserted");
 
             String[] resultStrs = convertContentValuesToUXFormat(cVVector);
+
             return resultStrs;
 
         } catch (JSONException e) {
