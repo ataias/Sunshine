@@ -30,6 +30,8 @@
         <item>1</item>
     </string-array>
 
+    <string name="pref_temperature_unit_metric">0</string>
+
     <string name="pref_temperature_unit_title">Unit</string>
     <string name="pref_temperature_unit_key">unit</string>
     <string name="action_map">Open map</string>
