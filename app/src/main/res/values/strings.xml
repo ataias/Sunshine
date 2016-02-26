@@ -36,6 +36,10 @@
     <string name="pref_temperature_unit_key">unit</string>
     <string name="action_map">Open map</string>
     <string name="share">Share</string>
+    <string name="list_item_date_textview">Tomorrow</string>
+    <string name="list_item_forecast_textview">Clear</string>
+    <string name="list_item_high_textview">21º</string>
+    <string name="list_item_low_textview">8º</string>
 
     <!-- End of temperature preference-->
 
