@@ -2,11 +2,15 @@ package io.github.ataias.othersunshine;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import io.github.ataias.othersunshine.data.WeatherContract;
 
@@ -110,10 +114,36 @@ public class ForecastAdapter extends CursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        // our view is pretty simple here --- just a text view
-        // we'll keep the UI functional with a simple (and slow!) binding.
+        //read weather ID
+        int weatherID = cursor.getInt(COL_WEATHER_ID);
+        //Use placeholder image for now
+        ImageView iconView = (ImageView) view.findViewById(R.id.list_item_icon);
+        iconView.setImageResource(R.drawable.ic_launcher);
 
+        //get date in miliseconds
+        long date = cursor.getLong(COL_WEATHER_DATE);
+        String prettyDate = Utility.getFriendlyDayString(context, date);
+        TextView dateView = (TextView) view.findViewById(R.id.list_item_date_textview);
+        dateView.setText(prettyDate);
+
+        //Read weather forecast from cursor
+        String forecast = cursor.getString(COL_WEATHER_DESC);
+        TextView forecastView = (TextView) view.findViewById(R.id.list_item_forecast_textview);
+        forecastView.setText(forecast);
+
+        // Read user preference for metric or imperial temperature units
+        boolean isMetric = Utility.isMetric(context);
 //        TextView tv = (TextView) view;
 //        tv.setText(convertCursorRowToUXFormat(cursor));
+
+        // Read high temperature from cursor
+        double high = cursor.getDouble(COL_WEATHER_MAX_TEMP);
+        TextView highView = (TextView) view.findViewById(R.id.list_item_high_textview);
+        highView.setText(Utility.formatTemperature(high, isMetric));
+
+        // Read low temperature from cursor
+        double low = cursor.getDouble(COL_WEATHER_MIN_TEMP);
+        TextView lowView = (TextView) view.findViewById(R.id.list_item_low_textview);
+        lowView.setText(Utility.formatTemperature(low, isMetric));
     }
 }
